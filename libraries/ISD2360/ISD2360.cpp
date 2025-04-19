@@ -17,30 +17,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <SPI.h>
+
 #include "ISD2360.h"
 
 ISD2360::ISD2360(uint8_t pinRdy, uint8_t pinSsb, bool debug = false)
 {
   this->pinRdy = pinRdy;
   this->pinSsb = pinSsb;
+
+  // MSB first
+  // Mode 3
+  // 125 kHz
+  this->spiSettings = SPISettings(125000, MSBFIRST, SPI_MODE3);
+
   this->debug = debug;
 }
 
 void ISD2360::begin()
 {
-  pinMode(this->pinRdy, INPUT);
-  pinMode(11, OUTPUT); // MOSI
-  digitalWrite(11, LOW);
-  pinMode(13, OUTPUT); // SCK
-  digitalWrite(13, HIGH);
+  // non-standard CS pin
   pinMode(this->pinSsb, OUTPUT);
   digitalWrite(this->pinSsb, HIGH);
 
-  // MSB first
-  // Master
-  // Mode 3
-  // 125 kHz
-  SPCR = 0b01011111;
+  SPI.begin();
 
   if (this->debug)
   {
@@ -546,24 +546,20 @@ void ISD2360::spiTransfer(uint8_t cmd, const uint8_t *data, size_t dataLen, uint
     return;
   }
 
+  SPI.beginTransaction(this->spiSettings);
   digitalWrite(this->pinSsb, LOW);
 
   // write command and read status
-  SPDR = cmd;
-  while (!(SPSR & _BV(SPIF)))
-    ;
-  this->deviceStatus = SPDR;
+  this->deviceStatus = SPI.transfer(cmd);
 
   for (uint8_t i = 0; i < dataLen; ++i)
   {
     while (digitalRead(this->pinRdy) == LOW)
       ;
-    SPDR = data[i];
-    while (!(SPSR & _BV(SPIF)))
-      ;
-    response[i] = SPDR;
+    response[i] = SPI.transfer(data[i]);
   }
   digitalWrite(this->pinSsb, HIGH);
+  SPI.endTransaction();
 }
 
 void ISD2360::loadAddress(uint32_t addr)

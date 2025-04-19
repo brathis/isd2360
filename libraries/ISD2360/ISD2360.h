@@ -114,6 +114,7 @@ public:
 private:
   uint8_t pinRdy;
   uint8_t pinSsb;
+  SPISettings spiSettings;
   
   uint8_t deviceStatus;
   uint8_t data[ISD2360_BUF_SIZE] = {0};
