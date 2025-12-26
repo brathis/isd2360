@@ -13,6 +13,7 @@ pin number of the chip-select pin.
 The uploader has so far only been tested on Linux using Python 3.8. The following non-standard dependencies are required:
   - [`tqdm`](https://github.com/tqdm/tqdm)
   - [`pyserial`](https://github.com/pyserial/pyserial)
+  
 When using pip, you may use the provided `requirements.txt` file to automatically install the dependencies as follows:
 ```
 pip install -r ./uploader/requirements.txt

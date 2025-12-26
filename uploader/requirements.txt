@@ -1,2 +1,2 @@
-pyserial~=3.4
-tqdm~=4.46.1
+pyserial==3.5
+tqdm==4.67.1
